@@ -36,3 +36,28 @@ Traceback (most recent call last):
 AttributeError: 'EditForm' object has no attribute 'nickname'
 2016-08-31 15:02:43,359 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
 2016-08-31 15:04:09,443 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
+2016-08-31 15:49:29,117 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
+2016-08-31 15:59:01,224 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
+2016-08-31 16:06:42,546 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
+2016-08-31 16:07:24,641 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
+2016-08-31 16:27:28,953 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
+2016-08-31 16:27:38,288 ERROR: Exception on /edit [GET] [in /Users/tao/.virtualenvs/flask/lib/python2.7/site-packages/flask/app.py:1587]
+Traceback (most recent call last):
+  File "/Users/tao/.virtualenvs/flask/lib/python2.7/site-packages/flask/app.py", line 1988, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/tao/.virtualenvs/flask/lib/python2.7/site-packages/flask/app.py", line 1641, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/tao/.virtualenvs/flask/lib/python2.7/site-packages/flask/app.py", line 1544, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/tao/.virtualenvs/flask/lib/python2.7/site-packages/flask/app.py", line 1639, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/tao/.virtualenvs/flask/lib/python2.7/site-packages/flask/app.py", line 1625, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/tao/.virtualenvs/flask/lib/python2.7/site-packages/flask_login.py", line 792, in decorated_view
+    return func(*args, **kwargs)
+  File "/Users/tao/Study/projects/microblog_flask/app/views.py", line 109, in edit
+    flash('Your changes have been saved.')
+AttributeError: 'EditForm' object has no attribute 'nickname'
+2016-08-31 16:29:07,738 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
+2016-08-31 16:30:12,380 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
+2016-08-31 16:33:37,781 INFO: microblog startup [in /Users/tao/Study/projects/microblog_flask/app/__init__.py:38]
