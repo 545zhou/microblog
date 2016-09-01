@@ -5,6 +5,7 @@ from datetime import datetime
 from app import app, db, lm, oid
 from .forms import LoginForm, EditForm, PostForm, SearchForm
 from .models import User, Post
+from .emails import follower_notification
 from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS
 
 
@@ -12,29 +13,16 @@ from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS
 def load_user(id):
     return User.query.get(int(id))
 
+
 @app.before_request
 def before_request():
-    g.user = current_user              #what is g?
+    g.user = current_user
     if g.user.is_authenticated:
         g.user.last_seen = datetime.utcnow()
         db.session.add(g.user)
         db.session.commit()
         g.search_form = SearchForm()
 
-@app.route('/search', methods=['POST'])
-@login_required
-def search():
-    if not g.search_form.validate_on_submit():
-        return redirect(url_for('index'))
-    return redirect(url_for('search_results', query=g.search_form.search.data))
-
-@app.route('/search_results/<query>')
-@login_required
-def search_results(query):
-    results = Post.query.whoosh_search(query, MAX_SEARCH_RESULTS).all()
-    return render_template('search_results.html',
-                           query=query,
-                           results=results)
 
 @app.errorhandler(404)
 def not_found_error(error):
@@ -54,7 +42,8 @@ def internal_error(error):
 def index(page=1):
     form = PostForm()
     if form.validate_on_submit():
-        post = Post(body=form.post.data, timestamp=datetime.utcnow(), author=g.user)
+        post = Post(body=form.post.data, timestamp=datetime.utcnow(),
+                    author=g.user)
         db.session.add(post)
         db.session.commit()
         flash('Your post is now live!')
@@ -125,6 +114,7 @@ def user(nickname, page=1):
                            user=user,
                            posts=posts)
 
+
 @app.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit():
@@ -143,11 +133,15 @@ def edit():
 
 
 @app.route('/follow/<nickname>')
+@login_required
 def follow(nickname):
     user = User.query.filter_by(nickname=nickname).first()
     if user is None:
-        flash('User ' + nickname + ' not found.')
+        flash('User %s not found.' % nickname)
         return redirect(url_for('index'))
+    if user == g.user:
+        flash('You can\'t follow yourself!')
+        return redirect(url_for('user', nickname=nickname))
     u = g.user.follow(user)
     if u is None:
         flash('Cannot follow ' + nickname + '.')
@@ -155,15 +149,20 @@ def follow(nickname):
     db.session.add(u)
     db.session.commit()
     flash('You are now following ' + nickname + '!')
+    follower_notification(user, g.user)
     return redirect(url_for('user', nickname=nickname))
 
 
 @app.route('/unfollow/<nickname>')
+@login_required
 def unfollow(nickname):
     user = User.query.filter_by(nickname=nickname).first()
     if user is None:
-        flash('User ' + nickname + ' not found.')
+        flash('User %s not found.' % nickname)
         return redirect(url_for('index'))
+    if user == g.user:
+        flash('You can\'t unfollow yourself!')
+        return redirect(url_for('user', nickname=nickname))
     u = g.user.unfollow(user)
     if u is None:
         flash('Cannot unfollow ' + nickname + '.')
@@ -172,3 +171,20 @@ def unfollow(nickname):
     db.session.commit()
     flash('You have stopped following ' + nickname + '.')
     return redirect(url_for('user', nickname=nickname))
+
+
+@app.route('/search', methods=['POST'])
+@login_required
+def search():
+    if not g.search_form.validate_on_submit():
+        return redirect(url_for('index'))
+    return redirect(url_for('search_results', query=g.search_form.search.data))
+
+
+@app.route('/search_results/<query>')
+@login_required
+def search_results(query):
+    results = Post.query.whoosh_search(query, MAX_SEARCH_RESULTS).all()
+    return render_template('search_results.html',
+                           query=query,
+                           results=results)
